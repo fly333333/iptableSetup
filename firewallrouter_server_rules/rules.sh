@@ -27,13 +27,6 @@ for ip in $(cat /etc/iptables/smtp_whitelist.txt); do
     sudo iptables -A FORWARD -i eth0 -o eth1 -p tcp --dport 25 -d 192.168.1.200 -s $ip -j ACCEPT
 done
 
-# Output chain
-# loopback
-sudo iptables -A OUTPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
-
-# all outgoing from firewall/router itself allow:
-sudo iptables -A OUTPUT -j ACCEPT
-
 # Allow internal network outgoing (with forward and interfaces, rather that output):
 sudo iptables -A FORWARD -i eth1 -o eth0 -j ACCEPT
 
@@ -42,6 +35,13 @@ sudo iptables -A FORWARD -i eth2 -o eth0 -p udp --dport 53 -j ACCEPT
 sudo iptables -A FORWARD -i eth2 -o eth0 -p tcp --dport 53 -j ACCEPT
 sudo iptables -A FORWARD -i eth2 -o eth0 -p udp --dport 123 -j ACCEPT
 
+# Output chain
+# loopback
+sudo iptables -A OUTPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
+
+# all outgoing from firewall/router itself allow:
+sudo iptables -A OUTPUT -j ACCEPT
+
 # Log dropped packets:
 sudo iptables -A INPUT -j LOG --log-prefix "IPTables-Dropped: "
 sudo iptables -A FORWARD -j LOG --log-prefix "IPTables-Dropped: "
@@ -49,4 +49,3 @@ sudo iptables -A OUTPUT -j LOG --log-prefix "IPTables-Dropped: "
 # Drop everything else
 sudo iptables -P INPUT DROP
 sudo iptables -P FORWARD DROP
-sudo iptables -P OUTPUT DROP
